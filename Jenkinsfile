@@ -16,14 +16,14 @@ pipeline {
 
         string(
             name: 'IMAGE_NAME',
-            defaultValue: 'cicd-lab-webapp',
+            defaultValue: 'cicd-security-monitoring-lab-webapp',
             description: 'Nombre local de la imagen Docker'
         )
     }
 
     environment {
-        CONTAINER_NAME = 'cicd-lab-webapp-test'
-        APP_PORT = '3000'
+        CONTAINER_NAME = 'cicd-security-monitoring-test'
+        APP_PORT = '3001'
     }
 
     stages {
