@@ -167,7 +167,7 @@ pipeline {
 
                     curl --fail \
                         --show-error \
-                        http://localhost:${APP_PORT}/health
+                        http://localhost:${HOST_PORT}/health
                 '''
             }
         }
