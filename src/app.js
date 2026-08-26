@@ -5,7 +5,7 @@ const PORT = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
   res.status(200).json({
-    application: "cicd-lab-webapp",
+    application: "cicd-lab-securty-monitoring-webapp",
     status: "ok",
     message: "CI/CD laboratory application 2"
   });
