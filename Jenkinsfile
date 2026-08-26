@@ -23,7 +23,8 @@ pipeline {
 
     environment {
         CONTAINER_NAME = 'cicd-security-monitoring-test'
-        APP_PORT = '3001'
+        HOST_PORT  = '3001'
+        CONTAINER_PORT = '3000'
     }
 
     stages {
@@ -118,7 +119,7 @@ pipeline {
 
                     docker run -d \
                         --name ${CONTAINER_NAME} \
-                        -p ${APP_PORT}:${APP_PORT} \
+                        -p ${HOST_PORT}:${CONTAINER_PORT} \
                         ${FULL_IMAGE}
 
                     echo "======================================"
