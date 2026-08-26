@@ -4,7 +4,7 @@ pipeline {
     parameters {
         string(
             name: 'GIT_REPOSITORY',
-            defaultValue: 'https://github.com/juansebastian-br/CI-CD-with-jenkins.git',
+            defaultValue: 'https://github.com/winstonjss/CICD-jenkins-securityAndMonitoring.git',
             description: 'URL del repositorio GitHub'
         )
 
