@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cicd-lab-webapp
+  labels:
+    app: cicd-lab-webapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cicd-lab-webapp
+  template:
+    metadata:
+      labels:
+        app: cicd-lab-webapp
+    spec:
+      containers:
+        - name: webapp
+          image: docker.io/winstonjss/cicd-lab-webapp:latest
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
