@@ -30,8 +30,9 @@ Desarrollador
               - Check container
               - Smoke test
               - Cleanup
-	      |
-              v (Exporta métricas en /prometheus/)
+               |
+               v
+               (Exporta métricas en /prometheus/)
 ```
 
 ## Aplicación
@@ -256,19 +257,99 @@ Además, el usuario utilizado por Jenkins debe contar con permisos suficientes p
 El pipeline utiliza el Docker Engine disponible en el servidor Jenkins para construir y ejecutar la imagen de la aplicación.
 
 
+---
 
-=========================================================
-                 PILA DE MONITOREO
-=========================================================
-  Contenedores Docker  ----> cAdvisor (Puerto 8081)
-  Jenkins (Host)       ----> /prometheus/ (Puerto 8080)
-                                |
-                                v
-                       Prometheus (Puerto 9090)
-                                |
-                                v
-                        Grafana (Puerto 3002)
-                                |
-             +------------------+------------------+
-             |                                     |
-    Visualización (Dashboards)            Alertas (SMS / Email)
+## Pila de monitoreo
+
+La infraestructura de monitoreo permite recopilar métricas de los contenedores Docker y del servidor Jenkins, almacenarlas en Prometheus y visualizarlas mediante Grafana.
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                    PILA DE MONITOREO                        │
+└─────────────────────────────────────────────────────────────┘
+
+              Contenedores Docker
+                      │
+                      ▼
+              ┌───────────────┐
+              │    cAdvisor   │
+              │  Puerto 8081  │
+              └───────┬───────┘
+                      │
+                      │ Métricas
+                      ▼
+              ┌───────────────┐
+              │   Prometheus  │
+              │  Puerto 9090  │
+              └───────┬───────┘
+                      │
+                      │ Consultas
+                      ▼
+              ┌───────────────┐
+              │    Grafana    │
+              │  Puerto 3002  │
+              └───────┬───────┘
+                      │
+             ┌────────┴────────┐
+             │                 │
+             ▼                 ▼
+      ┌──────────────┐  ┌──────────────┐
+      │  Dashboards  │  │    Alertas   │
+      │ Visualización│  │  SMS / Email │
+      └──────────────┘  └──────────────┘
+
+
+                 Jenkins (Host)
+                      │
+                      │ /prometheus/
+                      │ Puerto 8080
+                      │
+                      └──────────────► Prometheus
+```
+
+### Componentes
+
+| Componente | Puerto | Función |
+|---|---:|---|
+| Jenkins | `3000` | Ejecución del pipeline CI/CD |
+| cAdvisor | `8081` | Recolección de métricas de los contenedores Docker |
+| Jenkins Metrics | `8080` | Exposición de métricas de Jenkins |
+| Prometheus | `9090` | Recolección y almacenamiento de métricas |
+| Grafana | `3002` | Visualización de métricas mediante dashboards |
+
+### Flujo de monitoreo
+
+```text
+Contenedores Docker
+        │
+        ▼
+    cAdvisor
+        │
+        │ Métricas de contenedores
+        ▼
+    Prometheus ◄──── Jenkins (Host)
+        │                 │
+        │                 │ /prometheus/
+        │                 │ Puerto 8080
+        │
+        │ Consultas
+        ▼
+     Grafana
+        │
+        ├──────────► Dashboards
+        │
+        └──────────► Alertas
+                      │
+                      ├──► SMS
+                      └──► Email
+```
+## Credenciales y accesos
+
+| Servicio | URL | Usuario | Contraseña |
+|---|---|---|---|
+| Jenkins | http://3.145.86.19:8080/ | `admin` | `admin` |
+| Aplicación | http://3.145.86.19:3001/ | — | — |
+| Prometheus | http://3.145.86.19:9090/query | `admin` | `admin` |
+| Grafana | http://3.145.86.19:3002/ | `admin` | `admin` |
+
+> **Nota:** Estas credenciales corresponden al entorno de laboratorio.
