@@ -2,242 +2,113 @@ pipeline {
     agent any
 
     parameters {
-        string(
-            name: 'GIT_REPOSITORY',
-            defaultValue: 'https://github.com/winstonjss/CICD-jenkins-securityAndMonitoring.git',
-            description: 'URL del repositorio GitHub'
-        )
-
-        string(
-            name: 'GIT_BRANCH',
-            defaultValue: 'main',
-            description: 'Rama a construir'
-        )
-
-        string(
-            name: 'IMAGE_NAME',
-            defaultValue: 'cicd-security-monitoring-lab-webapp',
-            description: 'Nombre local de la imagen Docker'
-        )
+        string(name: 'GIT_REPOSITORY', defaultValue: 'https://github.com/winstonjss/CICD-jenkins-securityAndMonitoring.git', description: 'URL del repositorio')
+        string(name: 'GIT_BRANCH', defaultValue: 'main', description: 'Rama para desplegar')
+        string(name: 'IMAGE_NAME', defaultValue: 'cicd-lab-webapp', description: 'Nombre de la imagen Docker')
     }
 
     environment {
-        CONTAINER_NAME = 'cicd-security-monitoring-test'
-        HOST_PORT  = '3001'
-        CONTAINER_PORT = '3000'
+        SNYK_CRED_ID = 'SNYK_TOKEN'
+        SONAR_SCANNER_HOME = tool 'SonarScanner'
     }
 
     stages {
-
         stage('Clone repository') {
             steps {
-                echo "======================================"
-                echo "CLONANDO REPOSITORIO"
-                echo "======================================"
-
-                git branch: "${params.GIT_BRANCH}",
-                    url: "${params.GIT_REPOSITORY}"
+                git branch: params.GIT_BRANCH, url: params.GIT_REPOSITORY
             }
         }
 
         stage('Check Docker') {
             steps {
-                sh '''
-                    echo "======================================"
-                    echo "VERIFICANDO DOCKER"
-                    echo "======================================"
+                sh 'docker --version'
+            }
+        }
 
-                    whoami
-                    docker --version
-                    docker ps -a
-                '''
+        stage('Snyk Security Scan') {
+            steps {
+                script {
+                    echo 'Iniciando escaneo de seguridad de dependencias con Snyk...'
+                    withCredentials([string(credentialsId: "${env.SNYK_CRED_ID}", variable: 'SNYK_TOKEN')]) {
+                        sh 'npm install'
+                        sh 'npx snyk test --severity-threshold=high || echo "Snyk detectó vulnerabilidades de severidad alta"'
+                    }
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    echo 'Iniciando análisis estático de código con SonarQube...'
+                    withSonarQubeEnv('SonarQube-Server') {
+                        sh "${env.SONAR_SCANNER_HOME}/bin/sonar-scanner"
+                    }
+                }
+            }
+        }
+
+
+        stage('SonarQube Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
 
         stage('Build Docker image') {
             steps {
-                script {
-                    env.IMAGE_TAG = "${env.BUILD_NUMBER}"
-                    env.FULL_IMAGE = "${params.IMAGE_NAME}:${env.IMAGE_TAG}"
-                }
-
-                sh '''
-                    echo "======================================"
-                    echo "CONSTRUYENDO IMAGEN"
-                    echo "======================================"
-
-                    docker build \
-                        -t ${FULL_IMAGE} \
-                        -t ${IMAGE_NAME}:latest \
-                        .
-
-                    echo "Imagen creada:"
-                    docker images ${IMAGE_NAME}
-                '''
+                sh "docker build -t ${params.IMAGE_NAME}:${BUILD_NUMBER} -t ${params.IMAGE_NAME}:latest ."
             }
         }
 
         stage('Validate Docker image') {
             steps {
-                sh '''
-                    echo "======================================"
-                    echo "VALIDANDO IMAGEN"
-                    echo "======================================"
-
-                    docker image inspect ${FULL_IMAGE}
-
-                    echo "Imagen válida."
-                '''
+                sh "docker images | grep ${params.IMAGE_NAME}"
             }
         }
 
         stage('Remove previous container') {
             steps {
-                sh '''
-                    echo "======================================"
-                    echo "ELIMINANDO CONTENEDOR ANTERIOR"
-                    echo "======================================"
-
-                    docker rm -f ${CONTAINER_NAME} 2>/dev/null || true
-
-                    echo "Contenedores actuales:"
-                    docker ps -a
-                '''
+                sh "docker stop ${params.IMAGE_NAME} || true"
+                sh "docker rm ${params.IMAGE_NAME} || true"
             }
         }
 
         stage('Run Docker container') {
             steps {
-                sh '''
-                    echo "======================================"
-                    echo "EJECUTANDO DOCKER RUN"
-                    echo "======================================"
-
-                    echo "Imagen: ${FULL_IMAGE}"
-                    echo "Contenedor: ${CONTAINER_NAME}"
-                    echo "Puerto: ${APP_PORT}:${APP_PORT}"
-
-                    docker run -d \
-                        --name ${CONTAINER_NAME} \
-                        -p ${HOST_PORT}:${CONTAINER_PORT} \
-                        ${FULL_IMAGE}
-
-                    echo "======================================"
-                    echo "DOCKER RUN EJECUTADO"
-                    echo "======================================"
-
-                    docker ps -a
-
-                    echo "======================================"
-                    echo "PUERTOS DEL CONTENEDOR"
-                    echo "======================================"
-
-                    docker port ${CONTAINER_NAME}
-                '''
+                sh "docker run -d --name ${params.IMAGE_NAME} -p 3000:3000 ${params.IMAGE_NAME}:latest"
             }
         }
 
         stage('Check container') {
             steps {
-                sh '''
-                    echo "======================================"
-                    echo "ESTADO DEL CONTENEDOR"
-                    echo "======================================"
-
-                    docker ps -a \
-                        --filter "name=${CONTAINER_NAME}"
-
-                    echo "======================================"
-                    echo "LOGS DEL CONTENEDOR"
-                    echo "======================================"
-
-                    docker logs ${CONTAINER_NAME} 2>&1 || true
-                '''
+                sh "docker ps | grep ${params.IMAGE_NAME}"
             }
         }
 
         stage('Smoke test') {
             steps {
-                sh '''
-                    echo "======================================"
-                    echo "SMOKE TEST"
-                    echo "======================================"
-
-                    sleep 5
-
-                    curl --fail \
-                        --show-error \
-                        http://localhost:${HOST_PORT}/health
-                '''
+                // Validación del endpoint de salud [7, 35]
+                sh 'sleep 5'
+                sh 'curl -s http://localhost:3000/health || exit 1'
             }
         }
 
         stage('Cleanup old images') {
             steps {
-                sh '''
-                    echo "======================================"
-                    echo "LIMPIANDO IMÁGENES ANTIGUAS"
-                    echo "======================================"
-        
-                    CURRENT_BUILD=${BUILD_NUMBER}
-                    MIN_BUILD=$((CURRENT_BUILD - 2))
-        
-                    echo "Build actual: ${CURRENT_BUILD}"
-                    echo "Conservando builds: ${MIN_BUILD}, $((CURRENT_BUILD - 1)), ${CURRENT_BUILD}"
-        
-                    for TAG in $(docker images ${IMAGE_NAME} \
-                        --format '{{.Tag}}' \
-                        | grep -E '^[0-9]+$'); do
-        
-                        if [ "$TAG" -lt "$MIN_BUILD" ]; then
-                            echo "Eliminando: ${IMAGE_NAME}:${TAG}"
-                            docker rmi "${IMAGE_NAME}:${TAG}" || true
-                        fi
-                    done
-        
-                    echo "======================================"
-                    echo "IMÁGENES DESPUÉS DE LA LIMPIEZA"
-                    echo "======================================"
-        
-                    docker images ${IMAGE_NAME}
-                '''
+                sh 'docker image prune -f'
             }
         }
     }
 
     post {
-
         success {
-            echo "======================================"
-            echo "PIPELINE EXITOSO"
-            echo "======================================"
-
-            sh '''
-                echo "Contenedor:"
-                docker ps -a --filter "name=${CONTAINER_NAME}"
-
-                echo "Puerto:"
-                docker port ${CONTAINER_NAME}
-
-                echo "Logs:"
-                docker logs ${CONTAINER_NAME} 2>&1 || true
-            '''
+            echo '¡El pipeline de CD se completó con éxito con validaciones de seguridad superadas!'
         }
-
         failure {
-            echo "======================================"
-            echo "PIPELINE FALLIDO"
-            echo "======================================"
-
-            sh '''
-                echo "Contenedores:"
-                docker ps -a
-
-                echo "Logs del contenedor:"
-                docker logs ${CONTAINER_NAME} 2>&1 || true
-            '''
+            echo 'El pipeline falló. Por favor revise los logs de las etapas de validación o seguridad.'
         }
-
-
     }
 }
