@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     tools {
-            nodejs 'NodeJS-20' // Debe coincidir exactamente con el nombre que configuraste en el Paso 2
+            nodejs 'NodeJS-20'
     }
 
     parameters {
         string(name: 'GIT_REPOSITORY', defaultValue: 'https://github.com/winstonjss/CICD-jenkins-securityAndMonitoring.git', description: 'URL del repositorio')
         string(name: 'GIT_BRANCH', defaultValue: 'main', description: 'Rama para desplegar')
-        string(name: 'IMAGE_NAME', defaultValue: 'cicd-lab-webapp', description: 'Nombre de la imagen Docker')
+        string(name: 'IMAGE_NAME', defaultValue: 'cicd-lab-webapp-test', description: 'Nombre de la imagen Docker')
     }
 
     environment {
