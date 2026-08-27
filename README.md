@@ -30,6 +30,8 @@ Desarrollador
               - Check container
               - Smoke test
               - Cleanup
+	      |
+              v (Exporta métricas en /prometheus/)
 ```
 
 ## Aplicación
@@ -252,3 +254,21 @@ El servidor donde se ejecuta Jenkins debe disponer de las herramientas necesaria
 Además, el usuario utilizado por Jenkins debe contar con permisos suficientes para ejecutar Docker.
 
 El pipeline utiliza el Docker Engine disponible en el servidor Jenkins para construir y ejecutar la imagen de la aplicación.
+
+
+
+=========================================================
+                 PILA DE MONITOREO
+=========================================================
+  Contenedores Docker  ----> cAdvisor (Puerto 8081)
+  Jenkins (Host)       ----> /prometheus/ (Puerto 8080)
+                                |
+                                v
+                       Prometheus (Puerto 9090)
+                                |
+                                v
+                        Grafana (Puerto 3002)
+                                |
+             +------------------+------------------+
+             |                                     |
+    Visualización (Dashboards)            Alertas (SMS / Email)
