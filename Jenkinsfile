@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+            nodejs 'NodeJS-20' // Debe coincidir exactamente con el nombre que configuraste en el Paso 2
+    }
+
     parameters {
         string(name: 'GIT_REPOSITORY', defaultValue: 'https://github.com/winstonjss/CICD-jenkins-securityAndMonitoring.git', description: 'URL del repositorio')
         string(name: 'GIT_BRANCH', defaultValue: 'main', description: 'Rama para desplegar')
@@ -90,7 +94,6 @@ pipeline {
 
         stage('Smoke test') {
             steps {
-                // Validación del endpoint de salud [7, 35]
                 sh 'sleep 5'
                 sh 'curl -s http://localhost:3000/health || exit 1'
             }
