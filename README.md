@@ -339,8 +339,7 @@ Contenedores Docker
         ├──────────► Dashboards
         │
         └──────────► Alertas
-                      │
-                      ├──► SMS
+                      │                     
                       └──► Email
 ```
 ## Credenciales y accesos
