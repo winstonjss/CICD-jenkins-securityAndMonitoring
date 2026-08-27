@@ -12,10 +12,12 @@ Evidencias del proceso pueden ser consultadas en esta sección:
 
 
 - **SonarQube:** Calificación análisis SonarQube
+<img width="1278" height="339" alt="image" src="https://github.com/user-attachments/assets/a627864b-7b75-469d-891f-b5aab415c23f" />
 <img width="1636" height="714" alt="image" src="https://github.com/user-attachments/assets/12f2379a-3c04-4af3-87fe-836af62d4c95" />
 <img width="1188" height="249" alt="image" src="https://github.com/user-attachments/assets/1d85cb6d-b969-4750-a1cb-18debb031683" />
 
-- **Snyk:** Validación de librerías y versiones en Snyk
+- **Snyk:** Validación de dependencias y versiones en Snyk
+<img width="1460" height="490" alt="image" src="https://github.com/user-attachments/assets/16a40652-6c51-4129-899f-1057992cf3f6" />
 <img width="1647" height="254" alt="image" src="https://github.com/user-attachments/assets/a3b4320f-8ec6-42c8-bd09-ca272e9320ce" />
 <img width="1648" height="523" alt="image" src="https://github.com/user-attachments/assets/d6eccdf4-1f42-49b8-8986-e788591d1384" />
 <img width="1646" height="481" alt="image" src="https://github.com/user-attachments/assets/13cab167-21e1-40ab-9050-bfc752af41c7" />
