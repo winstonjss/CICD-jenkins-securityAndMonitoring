@@ -341,14 +341,4 @@ Contenedores Docker
         └──────────► Alertas
                       │                     
                       └──► Email
-```
-## Credenciales y accesos
 
-| Servicio | URL | Usuario | Contraseña |
-|---|---|---|---|
-| Jenkins | http://3.145.86.19:8080/ | `admin` | `admin` |
-| Aplicación | http://3.145.86.19:3001/ | — | — |
-| Prometheus | http://3.145.86.19:9090/query | `admin` | `admin` |
-| Grafana | http://3.145.86.19:3002/ | `admin` | `admin` |
-
-> **Nota:** Estas credenciales corresponden al entorno de laboratorio.
