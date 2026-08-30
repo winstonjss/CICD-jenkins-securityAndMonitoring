@@ -151,7 +151,7 @@ Para configurar el Job de Jenkins:
 4. Introducir la URL del repositorio:
 
 ```text
-https://github.com/juansebastian-br/CI-CD-with-jenkins.git
+https://github.com/winstonjss/CICD-jenkins-securityAndMonitoring.git
 ```
 
 5. Configurar la rama:
@@ -173,7 +173,7 @@ Jenkinsfile
 
 | Parámetro        | Ejemplo                                                      | Uso                        |
 | ---------------- | ------------------------------------------------------------ | -------------------------- |
-| `GIT_REPOSITORY` | `https://github.com/juansebastian-br/CI-CD-with-jenkins.git` | Repositorio                |
+| `GIT_REPOSITORY` | `https://github.com/winstonjss/CICD-jenkins-securityAndMonitoring.git` | Repositorio                |
 | `GIT_BRANCH`     | `main`                                                       | Rama                       |
 | `IMAGE_NAME`     | `cicd-lab-webapp`                                            | Nombre de la imagen Docker |
 
@@ -212,7 +212,7 @@ git init
 git add .
 git commit -m "Initial CI/CD laboratory"
 git branch -M main
-git remote add origin https://github.com/juansebastian-br/CI-CD-with-jenkins.git
+git remote add origin https://github.com/winstonjss/CICD-jenkins-securityAndMonitoring.git
 git push -u origin main
 ```
 
